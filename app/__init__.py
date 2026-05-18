@@ -1,8 +1,11 @@
-from flask import Flask
+from flask import Flask, request
 from .extensions import db, cors, jwt
 from datetime import timedelta
 
-
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # local dev (yarn dev)
+    "http://localhost:8080",  # docker
+]
 
 def create_app():
     app = Flask(__name__)
@@ -12,11 +15,11 @@ def create_app():
     app.config["JWT_SECRET_KEY"] = "change-this-super-secret-key"
     app.config["JWT_ACCESS_TOKEN_EXPIRES"]  = timedelta(minutes=30)
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
+
     db.init_app(app)
 
-
     cors.init_app(app,
-        resources={r"/api/*": {"origins": "http://localhost:5173"}},
+        resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
         supports_credentials=True,
         allow_headers=["Content-Type", "Authorization"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -30,7 +33,9 @@ def create_app():
 
     @app.after_request
     def add_cors_headers(response):
-        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+        origin = request.headers.get("Origin", "")
+        if origin in ALLOWED_ORIGINS:
+            response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
         response.headers["Access-Control-Allow-Credentials"] = "true"
