@@ -1,5 +1,10 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    jwt_required,
+    get_jwt_identity
+)
 from ..extensions import db
 from ..models import User
 
@@ -49,9 +54,18 @@ def login():
     if not user or not user.check_password(password):
         return jsonify({"message": "Invalid username or password"}), 401
 
-    access_token = create_access_token(identity=str(user.id))
+    access_token  = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
 
     return jsonify({
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "user": user.to_dict()
     }), 200
+
+@users_bp.post("/refresh")
+@jwt_required(refresh=True)
+def refresh():
+    identity = get_jwt_identity()
+    new_token = create_access_token(identity=identity)
+    return jsonify({"access_token": new_token}), 200

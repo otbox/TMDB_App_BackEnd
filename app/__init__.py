@@ -1,5 +1,8 @@
 from flask import Flask
 from .extensions import db, cors, jwt
+from datetime import timedelta
+
+
 
 def create_app():
     app = Flask(__name__)
@@ -7,8 +10,10 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///ratings.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = "change-this-super-secret-key"
-
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"]  = timedelta(minutes=30)
+    app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
     db.init_app(app)
+
 
     cors.init_app(app,
         resources={r"/api/*": {"origins": "http://localhost:5173"}},
