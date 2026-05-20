@@ -2,6 +2,7 @@ from datetime import datetime
 from .extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 class Rating(db.Model):
     __tablename__ = "ratings"
 
@@ -24,6 +25,31 @@ class Rating(db.Model):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+
+
+class EpisodeRating(db.Model):
+    __tablename__ = "episode_ratings"
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)
+    episode_id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Float, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
+
+    def to_dict(self):
+        return {
+            "user_id": self.user_id,
+            "episode_id": self.episode_id,
+            "rating": self.rating,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
 
 class User(db.Model):
     __tablename__ = "users"

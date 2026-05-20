@@ -3,9 +3,10 @@ from .extensions import db, cors, jwt
 from datetime import timedelta
 
 ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # local dev (yarn dev)
-    "http://localhost:8080",  # docker
+    "http://localhost:5173",
+    "http://localhost:8080",
 ]
+
 
 def create_app():
     app = Flask(__name__)
@@ -13,8 +14,7 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///ratings.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = "change-this-super-secret-key"
-    app.config["JWT_ACCESS_TOKEN_EXPIRES"]  = timedelta(minutes=30)
-    app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=7)
 
     db.init_app(app)
 
@@ -30,6 +30,7 @@ def create_app():
 
     from .routes.users import users_bp
     from .routes.ratings import ratings_bp
+    from .routes.episode_ratings import episode_ratings_bp
 
     @app.after_request
     def add_cors_headers(response):
@@ -43,9 +44,10 @@ def create_app():
 
     app.register_blueprint(users_bp, url_prefix="/api")
     app.register_blueprint(ratings_bp, url_prefix="/api")
+    app.register_blueprint(episode_ratings_bp, url_prefix="/api")
 
     with app.app_context():
-        from .models import User, Rating
+        from .models import User, Rating, EpisodeRating
         db.create_all()
 
     return app
