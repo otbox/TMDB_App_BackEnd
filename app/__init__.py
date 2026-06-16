@@ -1,5 +1,6 @@
 from flask import Flask
-from .extensions import db, cors, jwt
+from flask_cors import CORS
+from .extensions import db, jwt
 from datetime import timedelta
 import os
 
@@ -21,17 +22,15 @@ def create_app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=7)
 
     db.init_app(app)
+    jwt.init_app(app)
 
-    cors.init_app(
+    CORS(
         app,
-        resources={r"/api/*": {"origins": ALLOWED_ORIGINS}},
+        origins=ALLOWED_ORIGINS,
         supports_credentials=True,
         allow_headers=["Content-Type", "Authorization"],
         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        expose_headers=["Content-Type", "Authorization"]
     )
-
-    jwt.init_app(app)
 
     from .routes.users import users_bp
     from .routes.ratings import ratings_bp
