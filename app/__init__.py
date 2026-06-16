@@ -1,11 +1,12 @@
 from flask import Flask, request
 from .extensions import db, cors, jwt
 from datetime import timedelta
+import os
 
-ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:8080",
-]
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost:8080"
+).split(",")
 
 
 def create_app():
